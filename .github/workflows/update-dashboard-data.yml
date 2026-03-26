@@ -1,0 +1,84 @@
+name: Update Dashboard Data
+
+on:
+  schedule:
+    - cron: '*/30 * * * *'   # every 30 minutes
+  workflow_dispatch:           # manual trigger
+  push:
+    branches: [main]
+
+jobs:
+  update-data:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Fetch GitHub Project Data
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh api graphql -f query='
+          {
+            organization(login: "wix-private") {
+              projectV2(number: 365) {
+                items(first: 100) {
+                  nodes {
+                    fieldValues(first: 10) {
+                      nodes {
+                        ... on ProjectV2ItemFieldSingleSelectValue {
+                          name
+                          field { ... on ProjectV2SingleSelectField { name } }
+                        }
+                      }
+                    }
+                    content {
+                      ... on Issue {
+                        number
+                        title
+                        url
+                        repository { name }
+                        labels(first: 10) { nodes { name } }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }' | python3 -c "
+          import json, sys
+          raw = json.load(sys.stdin)
+          items = raw['data']['organization']['projectV2']['items']['nodes']
+          tickets = []
+          for item in items:
+              content = item.get('content')
+              if not content or 'number' not in content:
+                  continue
+              labels = [l['name'] for l in content.get('labels', {}).get('nodes', [])]
+              if not any(l.lower() == 'add to cart' for l in labels):
+                  continue
+              status = next(
+                  (fv['name'] for fv in item['fieldValues']['nodes']
+                   if fv.get('field', {}).get('name') == 'Status'),
+                  'No Status'
+              )
+              tickets.append({
+                  'number': content['number'],
+                  'title': content['title'],
+                  'url': content['url'],
+                  'repo': content['repository']['name'],
+                  'labels': labels,
+                  'status': status,
+              })
+          print(json.dumps({'tickets': tickets, 'updatedAt': __import__('datetime').datetime.utcnow().isoformat() + 'Z'}))
+          " > data.json
+
+      - name: Commit data.json
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data.json
+          git diff --cached --quiet || git commit -m "chore: update dashboard data [skip ci]"
+          git push

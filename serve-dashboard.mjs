@@ -1,0 +1,97 @@
+import { createServer } from 'http';
+import { readFileSync } from 'fs';
+import { join, dirname } from 'path';
+import { fileURLToPath } from 'url';
+import { execFile } from 'child_process';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const PORT = 5050;
+
+const GQL = `{
+  organization(login: "wix-private") {
+    projectV2(number: 365) {
+      items(first: 100) {
+        nodes {
+          fieldValues(first: 10) {
+            nodes {
+              ... on ProjectV2ItemFieldSingleSelectValue {
+                name
+                field { ... on ProjectV2SingleSelectField { name } }
+              }
+            }
+          }
+          content {
+            ... on Issue {
+              number
+              title
+              url
+              repository { name }
+              labels(first: 10) { nodes { name } }
+            }
+          }
+        }
+      }
+    }
+  }
+}`;
+
+function fetchProjectData() {
+  return new Promise((resolve, reject) => {
+    execFile('gh', ['api', 'graphql', '-f', `query=${GQL}`], (err, stdout, stderr) => {
+      if (err) return reject(stderr || err.message);
+      try {
+        const raw = JSON.parse(stdout);
+        const items = raw.data.organization.projectV2.items.nodes;
+
+        const tickets = items
+          .filter(item => item.content?.number)
+          .map(item => {
+            const status = item.fieldValues.nodes
+              .find(fv => fv?.field?.name === 'Status')?.name ?? 'No Status';
+            return {
+              number: item.content.number,
+              title: item.content.title,
+              url: item.content.url,
+              repo: item.content.repository.name,
+              labels: item.content.labels.nodes.map(l => l.name),
+              status,
+            };
+          })
+          .filter(t => t.labels.some(l => l.toLowerCase() === 'add to cart'))
+          .sort((a, b) => {
+            const order = ['To triage', 'Done'];
+            return order.indexOf(a.status) - order.indexOf(b.status);
+          });
+
+        resolve(tickets);
+      } catch (e) {
+        reject(e.message);
+      }
+    });
+  });
+}
+
+createServer(async (req, res) => {
+  if (req.url === '/api/data') {
+    try {
+      const data = await fetchProjectData();
+      res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
+      res.end(JSON.stringify(data));
+    } catch (e) {
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: String(e) }));
+    }
+    return;
+  }
+
+  try {
+    const file = readFileSync(join(__dirname, 'dashboard.html'), 'utf8');
+    res.writeHead(200, { 'Content-Type': 'text/html' });
+    res.end(file);
+  } catch {
+    res.writeHead(404);
+    res.end('Not found');
+  }
+}).listen(PORT, () => {
+  console.log(`Dashboard running at http://localhost:${PORT}`);
+});

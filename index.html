@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Add to Cart — QA Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #0d1117;
+      color: #e6edf3;
+      min-height: 100vh;
+      padding: 32px 24px;
+    }
+
+    header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 32px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    header h1 { font-size: 24px; font-weight: 700; color: #f0f6fc; }
+    header p  { font-size: 13px; color: #7d8590; margin-top: 4px; }
+
+    .refresh-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: #21262d;
+      border: 1px solid #30363d;
+      color: #e6edf3;
+      font-size: 13px;
+      padding: 7px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background .15s;
+      white-space: nowrap;
+    }
+    .refresh-btn:hover { background: #30363d; }
+    .refresh-btn:disabled { opacity: .5; cursor: not-allowed; }
+    .spin { display: inline-block; }
+    .spinning { animation: spin .7s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .last-updated {
+      font-size: 11px;
+      color: #7d8590;
+      margin-top: 4px;
+      text-align: right;
+    }
+
+    /* skeleton */
+    .skeleton {
+      background: linear-gradient(90deg, #161b22 25%, #21262d 50%, #161b22 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.4s infinite;
+      border-radius: 6px;
+    }
+    @keyframes shimmer { to { background-position: -200% 0; } }
+
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+    .card {
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 10px;
+      padding: 20px;
+    }
+    .card .label {
+      font-size: 12px;
+      color: #7d8590;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      margin-bottom: 8px;
+    }
+    .card .value { font-size: 36px; font-weight: 700; }
+    .card.total  .value { color: #79c0ff; }
+    .card.triage .value { color: #f78166; }
+    .card.done   .value { color: #3fb950; }
+    .card.pct    .value { color: #d2a8ff; font-size: 32px; }
+    .card .skel-val { height: 44px; width: 60px; }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 20px;
+      align-items: start;
+    }
+    @media (max-width: 700px) { .grid { grid-template-columns: 1fr; } }
+
+    .chart-card {
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 10px;
+      padding: 24px;
+    }
+    .chart-card h2 { font-size: 14px; font-weight: 600; color: #7d8590; margin-bottom: 16px; }
+    canvas { display: block; max-width: 100%; }
+
+    .legend {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 20px;
+    }
+    .legend-item { display: flex; align-items: center; gap: 10px; font-size: 13px; }
+    .legend-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+
+    .tickets-card {
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .tickets-card h2 {
+      font-size: 14px;
+      font-weight: 600;
+      color: #7d8590;
+      padding: 16px 20px;
+      border-bottom: 1px solid #30363d;
+    }
+
+    .group-header {
+      padding: 10px 20px;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .07em;
+      background: #0d1117;
+      border-bottom: 1px solid #21262d;
+    }
+    .group-header.triage { color: #f78166; }
+    .group-header.done   { color: #3fb950; }
+    .group-header.other  { color: #7d8590; }
+
+    .ticket-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 12px 20px;
+      border-bottom: 1px solid #21262d;
+      transition: background .15s;
+    }
+    .ticket-row:last-child { border-bottom: none; }
+    .ticket-row:hover { background: #1c2128; }
+    .ticket-num { font-size: 12px; color: #7d8590; flex-shrink: 0; padding-top: 2px; min-width: 58px; }
+    .ticket-title { font-size: 13px; color: #e6edf3; line-height: 1.5; }
+    .ticket-title a { color: inherit; text-decoration: none; }
+    .ticket-title a:hover { color: #79c0ff; }
+    .badge {
+      flex-shrink: 0;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 20px;
+      margin-left: auto;
+      white-space: nowrap;
+    }
+    .badge.triage { background: rgba(247,129,102,.15); color: #f78166; }
+    .badge.done   { background: rgba(63,185,80,.15);  color: #3fb950; }
+    .badge.other  { background: rgba(125,133,144,.15); color: #7d8590; }
+
+    .error-msg {
+      background: rgba(247,129,102,.1);
+      border: 1px solid rgba(247,129,102,.3);
+      color: #f78166;
+      border-radius: 8px;
+      padding: 16px 20px;
+      font-size: 13px;
+      margin-bottom: 24px;
+    }
+
+    .skel-row { height: 48px; margin: 1px 0; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>Add to Cart — Feature Testing Dashboard</h1>
+    <p>wix-private / project #365 &nbsp;·&nbsp; label: <code>add to cart</code> &nbsp;·&nbsp; live via GitHub API</p>
+  </div>
+  <div style="text-align:right">
+    <button class="refresh-btn" id="refreshBtn" onclick="loadData()">
+      <span class="spin" id="spinner">↻</span> Refresh
+    </button>
+    <div class="last-updated" id="lastUpdated"></div>
+  </div>
+</header>
+
+<div id="errorBanner" class="error-msg" style="display:none"></div>
+
+<div class="summary" id="summaryCards">
+  <div class="card total"><div class="label">Total tickets</div><div class="skeleton skel-val"></div></div>
+  <div class="card triage"><div class="label">To triage</div><div class="skeleton skel-val"></div></div>
+  <div class="card done"><div class="label">Done</div><div class="skeleton skel-val"></div></div>
+  <div class="card pct"><div class="label">Fixed</div><div class="skeleton skel-val"></div></div>
+</div>
+
+<div class="grid">
+  <div class="chart-card">
+    <h2>Status breakdown</h2>
+    <canvas id="donut" width="220" height="220"></canvas>
+    <div class="legend" id="legend"></div>
+  </div>
+  <div class="tickets-card">
+    <h2>All tickets</h2>
+    <div id="ticketList">
+      <div class="skeleton skel-row"></div>
+      <div class="skeleton skel-row"></div>
+      <div class="skeleton skel-row"></div>
+      <div class="skeleton skel-row"></div>
+      <div class="skeleton skel-row"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const STATUS_COLORS = {
+    'To triage': '#f78166',
+    'Done':      '#3fb950',
+  };
+  const DEFAULT_COLOR = '#7d8590';
+
+  function colorFor(status) {
+    return STATUS_COLORS[status] ?? DEFAULT_COLOR;
+  }
+  function badgeClass(status) {
+    if (status === 'To triage') return 'triage';
+    if (status === 'Done') return 'done';
+    return 'other';
+  }
+  function headerClass(status) {
+    return badgeClass(status);
+  }
+
+  let chart = null;
+
+  function renderSummary(tickets) {
+    const total   = tickets.length;
+    const triage  = tickets.filter(t => t.status === 'To triage').length;
+    const done    = tickets.filter(t => t.status === 'Done').length;
+    const pct     = total ? Math.round((done / total) * 100) : 0;
+
+    document.getElementById('summaryCards').innerHTML = `
+      <div class="card total"><div class="label">Total tickets</div><div class="value">${total}</div></div>
+      <div class="card triage"><div class="label">To triage</div><div class="value">${triage}</div></div>
+      <div class="card done"><div class="label">Done</div><div class="value">${done}</div></div>
+      <div class="card pct"><div class="label">Fixed</div><div class="value">${pct}%</div></div>
+    `;
+  }
+
+  function renderChart(tickets) {
+    const counts = {};
+    tickets.forEach(t => { counts[t.status] = (counts[t.status] ?? 0) + 1; });
+    const labels = Object.keys(counts);
+    const data   = labels.map(l => counts[l]);
+    const colors = labels.map(l => colorFor(l));
+
+    const ctx = document.getElementById('donut').getContext('2d');
+    if (chart) chart.destroy();
+    chart = new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels,
+        datasets: [{ data, backgroundColor: colors, borderColor: '#161b22', borderWidth: 3, hoverOffset: 6 }]
+      },
+      options: {
+        cutout: '68%',
+        plugins: {
+          legend: { display: false },
+          tooltip: { callbacks: { label: ctx => ` ${ctx.label}: ${ctx.parsed} tickets` } }
+        }
+      }
+    });
+
+    document.getElementById('legend').innerHTML = labels.map((l, i) => `
+      <div class="legend-item">
+        <div class="legend-dot" style="background:${colors[i]}"></div>
+        <span>${l} (${counts[l]})</span>
+      </div>
+    `).join('');
+  }
+
+  function renderTickets(tickets) {
+    const groups = {};
+    tickets.forEach(t => {
+      if (!groups[t.status]) groups[t.status] = [];
+      groups[t.status].push(t);
+    });
+
+    const statusOrder = ['To triage', 'Backlog', 'Ready', 'In progress', 'In review', 'Done'];
+    const sorted = Object.keys(groups).sort((a, b) => {
+      const ai = statusOrder.indexOf(a), bi = statusOrder.indexOf(b);
+      return (ai === -1 ? 99 : ai) - (bi === -1 ? 99 : bi);
+    });
+
+    document.getElementById('ticketList').innerHTML = sorted.map(status => `
+      <div class="group-header ${headerClass(status)}">${status} — ${groups[status].length} issue${groups[status].length !== 1 ? 's' : ''}</div>
+      ${groups[status].map(t => `
+        <div class="ticket-row">
+          <span class="ticket-num">#${t.number}</span>
+          <span class="ticket-title"><a href="${t.url}" target="_blank">${t.title}</a></span>
+          <span class="badge ${badgeClass(status)}">${status}</span>
+        </div>
+      `).join('')}
+    `).join('');
+  }
+
+  async function loadData() {
+    const btn     = document.getElementById('refreshBtn');
+    const spinner = document.getElementById('spinner');
+    const errBanner = document.getElementById('errorBanner');
+
+    btn.disabled = true;
+    spinner.classList.add('spinning');
+    errBanner.style.display = 'none';
+
+    try {
+      // Local dev: use Node.js backend. GitHub Pages: fall back to static data.json
+      const isLocal = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+      const endpoint = isLocal ? '/api/data' : './data.json';
+
+      const res  = await fetch(endpoint);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const payload = await res.json();
+      if (payload.error) throw new Error(payload.error);
+
+      // data.json wraps tickets in { tickets, updatedAt }; /api/data returns array directly
+      const data      = Array.isArray(payload) ? payload : payload.tickets;
+      const updatedAt = Array.isArray(payload) ? new Date() : new Date(payload.updatedAt);
+
+      renderSummary(data);
+      renderChart(data);
+      renderTickets(data);
+
+      document.getElementById('lastUpdated').textContent =
+        'Updated ' + updatedAt.toLocaleString('pl-PL', { timeZone: 'Europe/Warsaw', day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+    } catch (e) {
+      errBanner.textContent = 'Failed to load data: ' + e.message;
+      errBanner.style.display = 'block';
+    } finally {
+      btn.disabled = false;
+      spinner.classList.remove('spinning');
+    }
+  }
+
+  loadData();
+</script>
+</body>
+</html>
