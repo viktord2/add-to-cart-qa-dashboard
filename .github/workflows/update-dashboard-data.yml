@@ -48,44 +48,48 @@ jobs:
               }
             }
           }')
-          echo "DEBUG: total items=$(echo "$RAW" | python3 -c "import json,sys; d=json.load(sys.stdin); print(len(d['data']['organization']['projectV2']['items']['nodes']))")"
-          echo "DEBUG: errors=$(echo "$RAW" | python3 -c "import json,sys; d=json.load(sys.stdin); print(d.get('errors','none'))")"
-          echo "DEBUG: sample labels=$(echo "$RAW" | python3 -c "
-import json,sys
-d=json.load(sys.stdin)
-for item in d['data']['organization']['projectV2']['items']['nodes'][:5]:
-    c=item.get('content',{})
-    if c:
-        labels=[l['name'] for l in c.get('labels',{}).get('nodes',[])]
-        print(c.get('number'), labels)
-")"
+
+          echo "DEBUG total items: $(echo "$RAW" | python3 -c "import json,sys; nodes=json.load(sys.stdin)['data']['organization']['projectV2']['items']['nodes']; print(len(nodes))")"
+
           echo "$RAW" | python3 -c "
-          import json, sys
-          raw = json.load(sys.stdin)
-          items = raw['data']['organization']['projectV2']['items']['nodes']
-          tickets = []
-          for item in items:
-              content = item.get('content')
-              if not content or 'number' not in content:
-                  continue
-              labels = [l['name'] for l in content.get('labels', {}).get('nodes', [])]
-              if not any(l.lower() == 'add to cart' for l in labels):
-                  continue
-              status = next(
-                  (fv['name'] for fv in item['fieldValues']['nodes']
-                   if fv.get('field', {}).get('name') == 'Status'),
-                  'No Status'
-              )
-              tickets.append({
-                  'number': content['number'],
-                  'title': content['title'],
-                  'url': content['url'],
-                  'repo': content['repository']['name'],
-                  'labels': labels,
-                  'status': status,
-              })
-          print(json.dumps({'tickets': tickets, 'updatedAt': __import__('datetime').datetime.utcnow().isoformat() + 'Z'}))
-          " > data.json
+import json, sys
+nodes = json.load(sys.stdin)['data']['organization']['projectV2']['items']['nodes']
+for item in nodes[:5]:
+    c = item.get('content') or {}
+    num = c.get('number', 'N/A')
+    labels = [l['name'] for l in c.get('labels', {}).get('nodes', [])]
+    print(f'  #{num} labels={labels}')
+"
+
+          echo "$RAW" | python3 -c "
+import json, sys
+raw = json.load(sys.stdin)
+items = raw['data']['organization']['projectV2']['items']['nodes']
+tickets = []
+for item in items:
+    content = item.get('content')
+    if not content or 'number' not in content:
+        continue
+    labels = [l['name'] for l in content.get('labels', {}).get('nodes', [])]
+    if not any(l.lower() == 'add to cart' for l in labels):
+        continue
+    status = next(
+        (fv['name'] for fv in item['fieldValues']['nodes']
+         if fv.get('field', {}).get('name') == 'Status'),
+        'No Status'
+    )
+    tickets.append({
+        'number': content['number'],
+        'title': content['title'],
+        'url': content['url'],
+        'repo': content['repository']['name'],
+        'labels': labels,
+        'status': status,
+    })
+print(json.dumps({'tickets': tickets, 'updatedAt': __import__('datetime').datetime.utcnow().isoformat() + 'Z'}))
+" > data.json
+
+          echo "DEBUG tickets saved: $(python3 -c "import json; print(len(json.load(open('data.json'))['tickets']))")"
 
       - name: Commit data.json
         run: |
