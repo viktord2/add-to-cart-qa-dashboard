@@ -39,7 +39,15 @@ const GQL = `{
 function fetchProjectData() {
   return new Promise((resolve, reject) => {
     execFile('gh', ['api', 'graphql', '-f', `query=${GQL}`], (err, stdout, stderr) => {
-      if (err) return reject(stderr || err.message);
+      if (err) {
+        // Fall back to committed data.json when gh is unavailable (e.g. CI)
+        try {
+          const fallback = JSON.parse(readFileSync(join(__dirname, 'data.json'), 'utf8'));
+          return resolve(fallback.tickets ?? fallback);
+        } catch {
+          return reject(stderr || err.message);
+        }
+      }
       try {
         const raw = JSON.parse(stdout);
         const items = raw.data.organization.projectV2.items.nodes;
