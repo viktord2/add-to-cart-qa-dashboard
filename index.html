@@ -139,6 +139,35 @@
     .card.pct    .value { color: #a371f7; font-size: 32px; }
     .card .skel-val { height: 44px; width: 60px; }
 
+    .env-block {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 20px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .env-title {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+    .env-entries { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+    .env-sep { width: 1px; height: 32px; background: var(--border); }
+    .env-entry { display: flex; flex-direction: column; gap: 2px; }
+    .env-name { font-size: 12px; font-weight: 700; color: var(--text); }
+    .env-row { display: flex; align-items: center; gap: 6px; font-size: 12px; }
+    .env-key { color: var(--text-muted); min-width: 28px; }
+    .env-block code { font-size: 11px; background: var(--hover); padding: 1px 5px; border-radius: 4px; }
+    .env-block a { color: #2196f3; text-decoration: none; }
+    .env-block a:hover { text-decoration: underline; }
+
     .grid {
       display: grid;
       grid-template-columns: 280px 1fr;
@@ -240,6 +269,23 @@
   <div class="card triage" data-testid="card-triage"><div class="label">To triage</div><div class="skeleton skel-val"></div></div>
   <div class="card done" data-testid="card-done"><div class="label">Done</div><div class="skeleton skel-val"></div></div>
   <div class="card pct" data-testid="card-fixed"><div class="label">Fixed</div><div class="skeleton skel-val"></div></div>
+</div>
+
+<div class="env-block">
+  <div class="env-title">Test Environments</div>
+  <div class="env-entries">
+    <div class="env-entry">
+      <span class="env-name">V3_CATALOG</span>
+      <span class="env-row"><span class="env-key">msid</span><code>e9eea3e8-a1f7-4efa-ba01-ff4a7f03d5cf</code></span>
+      <span class="env-row"><span class="env-key">url</span><a href="https://www.addtocartcatalogv3.com/" target="_blank">addtocartcatalogv3.com</a></span>
+    </div>
+    <div class="env-sep"></div>
+    <div class="env-entry">
+      <span class="env-name">V1_CATALOG</span>
+      <span class="env-row"><span class="env-key">msid</span><code>58526119-e8bc-4272-a980-1967a392eaf8</code></span>
+      <span class="env-row"><span class="env-key">url</span><a href="https://www.euro2024.shop/" target="_blank">euro2024.shop</a></span>
+    </div>
+  </div>
 </div>
 
 <div class="grid">
