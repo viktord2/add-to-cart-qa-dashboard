@@ -27,6 +27,7 @@ const GQL = `{
               url
               repository { name }
               labels(first: 10) { nodes { name } }
+              assignees(first: 5) { nodes { login avatarUrl } }
             }
           }
         }
@@ -54,6 +55,7 @@ function fetchProjectData() {
               url: item.content.url,
               repo: item.content.repository.name,
               labels: item.content.labels.nodes.map(l => l.name),
+              assignees: item.content.assignees.nodes.map(a => ({ login: a.login, avatarUrl: a.avatarUrl })),
               status,
             };
           })

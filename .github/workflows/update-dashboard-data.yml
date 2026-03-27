@@ -41,6 +41,7 @@ jobs:
                         url
                         repository { name }
                         labels(first: 10) { nodes { name } }
+                        assignees(first: 5) { nodes { login avatarUrl } }
                       }
                     }
                   }

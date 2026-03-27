@@ -16,12 +16,17 @@ for item in nodes:
          if fv.get('field', {}).get('name') == 'Status'),
         'No Status'
     )
+    assignees = [
+        {'login': a['login'], 'avatarUrl': a['avatarUrl']}
+        for a in content.get('assignees', {}).get('nodes', [])
+    ]
     tickets.append({
         'number': content['number'],
         'title': content['title'],
         'url': content['url'],
         'repo': content['repository']['name'],
         'labels': labels,
+        'assignees': assignees,
         'status': status,
     })
 

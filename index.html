@@ -233,8 +233,11 @@
     .ticket-row:last-child { border-bottom: none; }
     .ticket-row:hover { background: var(--hover); }
     .ticket-num { font-size: 12px; color: var(--text-muted); flex-shrink: 0; padding-top: 2px; min-width: 58px; }
-    .ticket-title { font-size: 13px; color: var(--text); line-height: 1.5; }
+    .ticket-title { font-size: 13px; color: var(--text); line-height: 1.5; flex: 1; }
     .ticket-title a { color: inherit; text-decoration: none; }
+    .ticket-assignees { display: flex; gap: 4px; align-items: center; flex-shrink: 0; }
+    .assignee-avatar { width: 22px; height: 22px; border-radius: 50%; border: 1px solid var(--border); }
+    .assignee-unassigned { font-size: 11px; color: var(--text-muted); }
     .ticket-title a:hover { color: var(--link-hover); }
 
     .badge {
@@ -424,6 +427,11 @@
           <div class="ticket-row">
             <span class="ticket-num">#${t.number}</span>
             <span class="ticket-title"><a href="${t.url}" target="_blank">${t.title}</a></span>
+            <span class="ticket-assignees">
+              ${t.assignees && t.assignees.length
+                ? t.assignees.map(a => `<img class="assignee-avatar" src="${a.avatarUrl}" title="${a.login}" alt="${a.login}">`).join('')
+                : '<span class="assignee-unassigned">—</span>'}
+            </span>
             <span class="badge ${badgeClass(status)}">${status}</span>
           </div>
         `).join('')}
