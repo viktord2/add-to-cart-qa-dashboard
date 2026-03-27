@@ -85,12 +85,17 @@ test.describe('Add to Cart Dashboard', () => {
       }
     });
 
-    test('unassigned tickets show a dash placeholder', async ({ page }) => {
+    test('each ticket shows either an avatar or a dash placeholder', async ({ page }) => {
       await page.locator('[data-testid="ticket-list"] .ticket-row').first().waitFor({ timeout: 10000 });
 
-      const unassigned = page.locator('.ticket-assignees .assignee-unassigned');
-      // at least some tickets should be unassigned
-      expect(await unassigned.count()).toBeGreaterThan(0);
+      const rows = page.locator('[data-testid="ticket-list"] .ticket-row');
+      const count = await rows.count();
+      for (let i = 0; i < count; i++) {
+        const cell = rows.nth(i).locator('.ticket-assignees');
+        const hasAvatar = await cell.locator('.assignee-avatar').count() > 0;
+        const hasDash  = await cell.locator('.assignee-unassigned').count() > 0;
+        expect(hasAvatar || hasDash).toBe(true);
+      }
     });
 
     test('assigned tickets show an avatar with login as title', async ({ page }) => {
