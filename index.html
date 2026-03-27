@@ -224,8 +224,8 @@
   </div>
   <div style="text-align:right">
     <div class="header-actions">
-      <button class="btn theme-btn" id="themeBtn" onclick="toggleTheme()" title="Toggle theme">🌙</button>
-      <button class="btn" id="refreshBtn" onclick="loadData()">
+      <button class="btn theme-btn" id="themeBtn" data-testid="theme-toggle" onclick="toggleTheme()" title="Toggle theme">🌙</button>
+      <button class="btn" id="refreshBtn" data-testid="refresh-btn" onclick="loadData()">
         <span class="spin" id="spinner">↻</span> Refresh
       </button>
     </div>
@@ -236,10 +236,10 @@
 <div id="errorBanner" class="error-msg" style="display:none"></div>
 
 <div class="summary" id="summaryCards">
-  <div class="card total"><div class="label">Total tickets</div><div class="skeleton skel-val"></div></div>
-  <div class="card triage"><div class="label">To triage</div><div class="skeleton skel-val"></div></div>
-  <div class="card done"><div class="label">Done</div><div class="skeleton skel-val"></div></div>
-  <div class="card pct"><div class="label">Fixed</div><div class="skeleton skel-val"></div></div>
+  <div class="card total" data-testid="card-total"><div class="label">Total tickets</div><div class="skeleton skel-val"></div></div>
+  <div class="card triage" data-testid="card-triage"><div class="label">To triage</div><div class="skeleton skel-val"></div></div>
+  <div class="card done" data-testid="card-done"><div class="label">Done</div><div class="skeleton skel-val"></div></div>
+  <div class="card pct" data-testid="card-fixed"><div class="label">Fixed</div><div class="skeleton skel-val"></div></div>
 </div>
 
 <div class="grid">
@@ -250,7 +250,7 @@
   </div>
   <div class="tickets-card">
     <h2>All tickets</h2>
-    <div id="ticketList">
+    <div id="ticketList" data-testid="ticket-list">
       <div class="skeleton skel-row"></div>
       <div class="skeleton skel-row"></div>
       <div class="skeleton skel-row"></div>
@@ -307,10 +307,10 @@
     const done   = tickets.filter(t => t.status === 'Done').length;
     const pct    = total ? Math.round((done / total) * 100) : 0;
     document.getElementById('summaryCards').innerHTML = `
-      <div class="card total"><div class="label">Total tickets</div><div class="value">${total}</div></div>
-      <div class="card triage"><div class="label">To triage</div><div class="value">${triage}</div></div>
-      <div class="card done"><div class="label">Done</div><div class="value">${done}</div></div>
-      <div class="card pct"><div class="label">Fixed</div><div class="value">${pct}%</div></div>
+      <div class="card total" data-testid="card-total"><div class="label">Total tickets</div><div class="value">${total}</div></div>
+      <div class="card triage" data-testid="card-triage"><div class="label">To triage</div><div class="value">${triage}</div></div>
+      <div class="card done" data-testid="card-done"><div class="label">Done</div><div class="value">${done}</div></div>
+      <div class="card pct" data-testid="card-fixed"><div class="label">Fixed</div><div class="value">${pct}%</div></div>
     `;
   }
 

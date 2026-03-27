@@ -5,7 +5,7 @@ import { fileURLToPath } from 'url';
 import { execFile } from 'child_process';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const PORT = 5050;
+const PORT = process.env.PORT ? Number(process.env.PORT) : 5050;
 
 const GQL = `{
   organization(login: "wix-private") {
@@ -85,7 +85,7 @@ createServer(async (req, res) => {
   }
 
   try {
-    const file = readFileSync(join(__dirname, 'dashboard.html'), 'utf8');
+    const file = readFileSync(join(__dirname, 'index.html'), 'utf8');
     res.writeHead(200, { 'Content-Type': 'text/html' });
     res.end(file);
   } catch {

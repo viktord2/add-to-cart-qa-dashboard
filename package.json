@@ -1,0 +1,14 @@
+{
+  "name": "add-to-cart-qa-dashboard",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "git@github.com:viktord2/add-to-cart-qa-dashboard.git",
+  "author": "C3PO-OWK <meetifynet@gmail.com>",
+  "license": "MIT",
+  "scripts": {
+    "test": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.58.2"
+  }
+}
