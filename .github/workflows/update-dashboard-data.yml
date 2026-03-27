@@ -20,7 +20,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GH_PAT }}
         run: |
-          RAW=$(gh api graphql -f query='
+          gh api graphql -f query='
           {
             organization(login: "wix-private") {
               projectV2(number: 365) {
@@ -47,26 +47,25 @@ jobs:
                 }
               }
             }
-          }')
+          }' > /tmp/raw.json
 
-          echo "DEBUG total items: $(echo "$RAW" | python3 -c "import json,sys; nodes=json.load(sys.stdin)['data']['organization']['projectV2']['items']['nodes']; print(len(nodes))")"
-
-          echo "$RAW" | python3 -c "
+          python3 - << 'PYEOF'
 import json, sys
-nodes = json.load(sys.stdin)['data']['organization']['projectV2']['items']['nodes']
+
+with open('/tmp/raw.json') as f:
+    raw = json.load(f)
+
+nodes = raw['data']['organization']['projectV2']['items']['nodes']
+print(f'DEBUG: total items = {len(nodes)}')
+
 for item in nodes[:5]:
     c = item.get('content') or {}
     num = c.get('number', 'N/A')
     labels = [l['name'] for l in c.get('labels', {}).get('nodes', [])]
-    print(f'  #{num} labels={labels}')
-"
+    print(f'  DEBUG item #{num} labels={labels}')
 
-          echo "$RAW" | python3 -c "
-import json, sys
-raw = json.load(sys.stdin)
-items = raw['data']['organization']['projectV2']['items']['nodes']
 tickets = []
-for item in items:
+for item in nodes:
     content = item.get('content')
     if not content or 'number' not in content:
         continue
@@ -86,10 +85,14 @@ for item in items:
         'labels': labels,
         'status': status,
     })
-print(json.dumps({'tickets': tickets, 'updatedAt': __import__('datetime').datetime.utcnow().isoformat() + 'Z'}))
-" > data.json
 
-          echo "DEBUG tickets saved: $(python3 -c "import json; print(len(json.load(open('data.json'))['tickets']))")"
+import datetime
+result = {'tickets': tickets, 'updatedAt': datetime.datetime.utcnow().isoformat() + 'Z'}
+with open('data.json', 'w') as f:
+    json.dump(result, f)
+
+print(f'DEBUG: tickets saved = {len(tickets)}')
+PYEOF
 
       - name: Commit data.json
         run: |
