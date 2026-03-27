@@ -74,6 +74,38 @@ test.describe('Add to Cart Dashboard', () => {
     expect(href).toMatch(/github\.com\/wix-private\/.+\/issues\/\d+/);
   });
 
+  test.describe('Assignees', () => {
+    test('every ticket row has an assignee cell', async ({ page }) => {
+      await page.locator('[data-testid="ticket-list"] .ticket-row').first().waitFor({ timeout: 10000 });
+
+      const rows = page.locator('[data-testid="ticket-list"] .ticket-row');
+      const count = await rows.count();
+      for (let i = 0; i < count; i++) {
+        await expect(rows.nth(i).locator('.ticket-assignees')).toBeVisible();
+      }
+    });
+
+    test('unassigned tickets show a dash placeholder', async ({ page }) => {
+      await page.locator('[data-testid="ticket-list"] .ticket-row').first().waitFor({ timeout: 10000 });
+
+      const unassigned = page.locator('.ticket-assignees .assignee-unassigned');
+      // at least some tickets should be unassigned
+      expect(await unassigned.count()).toBeGreaterThan(0);
+    });
+
+    test('assigned tickets show an avatar with login as title', async ({ page }) => {
+      await page.locator('[data-testid="ticket-list"] .ticket-row').first().waitFor({ timeout: 10000 });
+
+      const avatars = page.locator('.ticket-assignees .assignee-avatar');
+      if (await avatars.count() > 0) {
+        const title = await avatars.first().getAttribute('title');
+        expect(title).toBeTruthy();
+        const src = await avatars.first().getAttribute('src');
+        expect(src).toMatch(/avatars\.githubusercontent\.com/);
+      }
+    });
+  });
+
   test.describe('Test Environments block', () => {
     test('shows V3_CATALOG and V1_CATALOG entries', async ({ page }) => {
       await expect(page.locator('.env-block')).toBeVisible();
