@@ -155,5 +155,29 @@ test.describe('Add to Cart Dashboard', () => {
       await expect(btn).toContainText('✓');
       await expect(btn).toHaveClass(/copied/);
     });
+
+    test('shows queen-peptides V3_CATALOG msid', async ({ page }) => {
+      await expect(page.locator('.env-block')).toContainText('04c6f6c9-4fb0-4a6a-a95a-dd189d27cc08');
+    });
+
+    test('displays queen-peptides URL as a link', async ({ page }) => {
+      const link = page.locator('.env-block a[href="https://viktord71.wixsite.com/v3-queenpeptides"]');
+      await expect(link).toBeVisible();
+    });
+
+    test('queen-peptides V3_CATALOG name links to simulations page', async ({ page }) => {
+      const link = page.locator('.env-block .env-name a[href="./v3-queen-peptides-simulations.html"]');
+      await expect(link).toBeVisible();
+      await expect(link).toContainText('V3_CATALOG');
+    });
+
+    test('queen-peptides msid copy button copies correct value to clipboard', async ({ page, context }) => {
+      await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+      const btn = page.getByTestId('copy-v3-queenpeptides-msid');
+      await expect(btn).toBeVisible();
+      await btn.click();
+      const copied = await page.evaluate(() => navigator.clipboard.readText());
+      expect(copied).toBe('04c6f6c9-4fb0-4a6a-a95a-dd189d27cc08');
+    });
   });
 });
