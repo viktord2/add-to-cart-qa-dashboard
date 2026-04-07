@@ -345,6 +345,28 @@
       background: var(--brand-light);
     }
 
+    /* pre-order / subscription / custom-text badges */
+    .badge-pre-order {
+      font-size: .65rem; font-weight: 700;
+      background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe;
+      border-radius: 4px; padding: 1px 5px; white-space: nowrap; flex-shrink: 0; cursor: help;
+    }
+    .badge-subscription {
+      font-size: .65rem; font-weight: 700;
+      background: #fdf4ff; color: #7e22ce; border: 1px solid #e9d5ff;
+      border-radius: 4px; padding: 1px 5px; white-space: nowrap; flex-shrink: 0; cursor: help;
+    }
+    .badge-custom-text {
+      font-size: .65rem; font-weight: 700;
+      background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0;
+      border-radius: 4px; padding: 1px 5px; white-space: nowrap; flex-shrink: 0; cursor: help;
+    }
+    .badge-custom-text-required {
+      font-size: .65rem; font-weight: 700;
+      background: #fefce8; color: #854d0e; border: 1px solid #fde047;
+      border-radius: 4px; padding: 1px 5px; white-space: nowrap; flex-shrink: 0; cursor: help;
+    }
+
     /* sale badge */
     .badge-sale {
       display: inline-block;
@@ -557,7 +579,7 @@
           <li>Reta 30mg <span class="stock-badge stock-in">50</span></li>
           <li>Reta 40mg <span class="stock-badge stock-in">34</span></li>
           <li class="oos">Semaglutide 10mg <span class="stock-badge stock-oos">Out of Stock</span></li>
-          <li class="oos">Semaglutide 30mg <span class="stock-badge stock-oos">Out of Stock</span></li>
+          <li class="oos">Semaglutide 30mg <span class="badge-pre-order" title="Pre-order — No limit">⏳ Pre-Order</span><span class="stock-badge stock-oos">Out of Stock</span></li>
           <li>Survodutide 10mg <span class="stock-badge stock-in">10</span></li>
           <li>Sema+Cagri 10 <span class="stock-badge stock-in">65</span></li>
           <li>Reta+Cagri 10 <span class="stock-badge stock-in">29</span></li>
@@ -572,7 +594,7 @@
           <li>BPC-157 — 10mg <span class="stock-badge stock-in">In Stock</span></li>
           <li>BPC-157 — 5mg <span class="stock-badge stock-in">In Stock</span></li>
           <li>Wolverine Stack (BPC-157/TB500) <span class="stock-badge stock-low">9</span></li>
-          <li>GHK-cu 100 <span class="stock-badge stock-in">186</span></li>
+          <li>GHK-cu 100 <span class="badge-subscription" title="Subscription only — one-time purchase not available">🔁 Subscription only</span><span class="stock-badge stock-in">186</span></li>
           <li>CJC-No DAC 10 <span class="stock-badge stock-in">In Stock</span></li>
           <li>Sermorelin 5mg <span class="stock-badge stock-in">48</span></li>
           <li>Ipamorelin 5mg <span class="stock-badge stock-low">3</span></li>
@@ -580,7 +602,7 @@
           <li>SNAP-8 10mg <span class="stock-badge stock-in">20</span></li>
           <li>KPV <span class="stock-badge stock-in">11</span></li>
           <li>SS-31 <span class="stock-badge stock-low">3</span></li>
-          <li>Epitalon 10 <span class="stock-badge stock-low">2</span></li>
+          <li>Epitalon 10 <span class="badge-custom-text" title="Custom text: text box (optional)">✏️ Custom Text</span><span class="stock-badge stock-low">2</span></li>
           <li>Kisspeptin 10 <span class="stock-badge stock-low">2</span></li>
           <li>Cerebrolysin 60 <span class="stock-badge stock-in">27</span></li>
           <li>VIP 10mg <span class="stock-badge stock-in">In Stock</span></li>
@@ -590,9 +612,9 @@
           <li>Super Human Blend <span class="stock-badge stock-in">29</span></li>
           <li>HGH 24iu <span class="stock-badge stock-in">18</span></li>
           <li>HMG <span class="stock-badge stock-in">20</span></li>
-          <li>AICAR 50 <span class="stock-badge stock-in">In Stock</span></li>
+          <li>AICAR 50 <span class="badge-custom-text-required" title="Custom text required: text box (required)">✏️ Custom Text*</span><span class="stock-badge stock-in">In Stock</span></li>
           <li>Thymosin Alpha-1 5mg <span class="stock-badge stock-in">In Stock</span></li>
-          <li class="oos">DSIP 5 <span class="stock-badge stock-oos">Out of Stock</span></li>
+          <li class="oos">DSIP 5 <span class="badge-pre-order" title="Pre-order — Limit: 5 items">⏳ Pre-Order (5)</span><span class="stock-badge stock-oos">Out of Stock</span></li>
           <li>Melatonin 10mg <span class="stock-badge stock-low">9</span></li>
           <li>Dermorphin 5mg <span class="stock-badge stock-in">In Stock</span></li>
           <li>TB500-B4 10mg <span class="stock-badge stock-in">30</span></li>
@@ -623,7 +645,7 @@
       <div class="category-card">
         <h3><span class="icon">✨</span> Skin &amp; Beauty</h3>
         <ul class="product-list">
-          <li>Klow 80mg <span class="stock-badge stock-in">44</span></li>
+          <li>Klow 80mg <span class="badge-subscription" title="Subscription available — one-time purchase also available">🔁 Subscription + one-time</span><span class="stock-badge stock-in">44</span></li>
           <li>Glow 70mg <span class="stock-badge stock-in">27</span></li>
           <li>GHK-cu Serum <span class="stock-badge stock-low">2</span></li>
           <li>Salmon DNA Serum Peptide <span class="stock-badge stock-low">3</span></li>
