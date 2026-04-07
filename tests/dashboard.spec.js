@@ -300,11 +300,11 @@ test.describe('Goldie & Celeste sub-page', () => {
   });
 
   test('expand/collapse all buttons toggle category cards', async ({ page }) => {
-    await page.locator('.conv-controls button', { hasText: 'Collapse All' }).click();
+    await page.locator('#catalogControls button', { hasText: 'Collapse All' }).click();
     const collapsed = page.locator('.category-card.collapsed');
     expect(await collapsed.count()).toBeGreaterThan(0);
 
-    await page.locator('.conv-controls button', { hasText: 'Expand All' }).click();
+    await page.locator('#catalogControls button', { hasText: 'Expand All' }).click();
     const stillCollapsed = page.locator('.category-card.collapsed');
     expect(await stillCollapsed.count()).toBe(0);
   });
