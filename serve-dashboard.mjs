@@ -1,6 +1,6 @@
 import { createServer } from 'http';
-import { readFileSync } from 'fs';
-import { join, dirname } from 'path';
+import { readFileSync, existsSync } from 'fs';
+import { join, dirname, extname } from 'path';
 import { fileURLToPath } from 'url';
 import { execFile } from 'child_process';
 
@@ -94,10 +94,22 @@ createServer(async (req, res) => {
     return;
   }
 
+  // Serve static files from the project root
+  const urlPath = req.url.split('?')[0];
+  const safePath = urlPath === '/' ? '/index.html' : urlPath;
+  const filePath = join(__dirname, safePath);
+  const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.json': 'application/json', '.csv': 'text/csv', '.css': 'text/css' };
+
   try {
-    const file = readFileSync(join(__dirname, 'index.html'), 'utf8');
-    res.writeHead(200, { 'Content-Type': 'text/html' });
-    res.end(file);
+    if (existsSync(filePath) && !filePath.includes('..')) {
+      const file = readFileSync(filePath);
+      const mime = MIME[extname(filePath)] || 'text/plain';
+      res.writeHead(200, { 'Content-Type': mime });
+      res.end(file);
+    } else {
+      res.writeHead(404);
+      res.end('Not found');
+    }
   } catch {
     res.writeHead(404);
     res.end('Not found');
