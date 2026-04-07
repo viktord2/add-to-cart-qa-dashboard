@@ -166,7 +166,7 @@ test.describe('Add to Cart Dashboard', () => {
     });
 
     test('queen-peptides V3_CATALOG name links to simulations page', async ({ page }) => {
-      const link = page.locator('.env-block .env-name a[href="./v3-queen-peptides-simulations.html"]');
+      const link = page.locator('.env-block .env-name a[href="./docs/simulations/v3-queen-peptides-simulations.html"]');
       await expect(link).toBeVisible();
       await expect(link).toContainText('V3_CATALOG');
     });
