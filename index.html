@@ -163,6 +163,7 @@
     .env-sep { width: 1px; height: 32px; background: var(--border); }
     .env-entry { display: flex; flex-direction: column; gap: 2px; }
     .env-name { font-size: 12px; font-weight: 700; color: var(--text); }
+    .env-label { font-size: 10px; font-weight: 500; color: var(--muted); background: var(--hover); border-radius: 3px; padding: 1px 5px; margin-left: 4px; vertical-align: middle; }
     .env-row { display: flex; align-items: center; gap: 6px; font-size: 12px; }
     .env-key { color: var(--text-muted); min-width: 28px; }
     .env-block code { font-size: 11px; background: var(--hover); padding: 1px 5px; border-radius: 4px; }
@@ -291,25 +292,25 @@
   <div class="env-title">Test Environments</div>
   <div class="env-entries">
     <div class="env-entry">
-      <span class="env-name">V3_CATALOG</span>
+      <span class="env-name">V3_CATALOG <span class="env-label">test site</span></span>
       <span class="env-row"><span class="env-key">msid</span><code>e9eea3e8-a1f7-4efa-ba01-ff4a7f03d5cf</code><button class="copy-btn" data-testid="copy-v3-msid" onclick="copyText('e9eea3e8-a1f7-4efa-ba01-ff4a7f03d5cf', this)" title="Copy msid">⎘</button></span>
       <span class="env-row"><span class="env-key">url</span><a href="https://www.addtocartcatalogv3.com/" target="_blank">addtocartcatalogv3.com</a></span>
     </div>
     <div class="env-sep"></div>
     <div class="env-entry">
-      <span class="env-name">V1_CATALOG</span>
+      <span class="env-name">V1_CATALOG <span class="env-label">test site</span></span>
       <span class="env-row"><span class="env-key">msid</span><code>58526119-e8bc-4272-a980-1967a392eaf8</code><button class="copy-btn" data-testid="copy-v1-msid" onclick="copyText('58526119-e8bc-4272-a980-1967a392eaf8', this)" title="Copy msid">⎘</button></span>
       <span class="env-row"><span class="env-key">url</span><a href="https://www.euro2024.shop/" target="_blank">euro2024.shop</a></span>
     </div>
     <div class="env-sep"></div>
     <div class="env-entry">
-      <span class="env-name"><a href="./docs/simulations/v3-queen-peptides-simulations.html" target="_blank">V3_CATALOG</a></span>
+      <span class="env-name"><a href="./docs/simulations/v3-queen-peptides-simulations.html" target="_blank">V3_CATALOG</a> <span class="env-label">clone of real stores</span></span>
       <span class="env-row"><span class="env-key">msid</span><code>04c6f6c9-4fb0-4a6a-a95a-dd189d27cc08</code><button class="copy-btn" data-testid="copy-v3-queenpeptides-msid" onclick="copyText('04c6f6c9-4fb0-4a6a-a95a-dd189d27cc08', this)" title="Copy msid">⎘</button></span>
       <span class="env-row"><span class="env-key">url</span><a href="https://viktord71.wixsite.com/v3-queenpeptides" target="_blank">viktord71.wixsite.com/v3-queenpeptides</a></span>
     </div>
     <div class="env-sep"></div>
     <div class="env-entry">
-      <span class="env-name"><a href="./goldie-celeste.html" target="_blank">V1_CATALOG</a></span>
+      <span class="env-name"><a href="./goldie-celeste.html" target="_blank">V1_CATALOG</a> <span class="env-label">clone of real stores</span></span>
       <span class="env-row"><span class="env-key">msid</span><code>8cb9cc76-d2c6-40a5-88ff-c5f3ac6f75af</code><button class="copy-btn" data-testid="copy-goldie-msid" onclick="copyText('8cb9cc76-d2c6-40a5-88ff-c5f3ac6f75af', this)" title="Copy msid">⎘</button></span>
       <span class="env-row"><span class="env-key">url</span><a href="https://viktord71.wixsite.com/goldie-c" target="_blank">viktord71.wixsite.com/goldie-c</a></span>
     </div>
