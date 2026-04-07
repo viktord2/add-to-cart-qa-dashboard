@@ -303,9 +303,15 @@
     </div>
     <div class="env-sep"></div>
     <div class="env-entry">
-      <span class="env-name"><a href="./v3-queen-peptides-simulations.html" target="_blank">V3_CATALOG</a></span>
+      <span class="env-name"><a href="./docs/simulations/v3-queen-peptides-simulations.html" target="_blank">V3_CATALOG</a></span>
       <span class="env-row"><span class="env-key">msid</span><code>04c6f6c9-4fb0-4a6a-a95a-dd189d27cc08</code><button class="copy-btn" data-testid="copy-v3-queenpeptides-msid" onclick="copyText('04c6f6c9-4fb0-4a6a-a95a-dd189d27cc08', this)" title="Copy msid">⎘</button></span>
       <span class="env-row"><span class="env-key">url</span><a href="https://viktord71.wixsite.com/v3-queenpeptides" target="_blank">viktord71.wixsite.com/v3-queenpeptides</a></span>
+    </div>
+    <div class="env-sep"></div>
+    <div class="env-entry">
+      <span class="env-name"><a href="./goldie-celeste.html" target="_blank">V1_CATALOG</a></span>
+      <span class="env-row"><span class="env-key">msid</span><code>8cb9cc76-d2c6-40a5-88ff-c5f3ac6f75af</code><button class="copy-btn" data-testid="copy-goldie-msid" onclick="copyText('8cb9cc76-d2c6-40a5-88ff-c5f3ac6f75af', this)" title="Copy msid">⎘</button></span>
+      <span class="env-row"><span class="env-key">url</span><a href="https://viktord71.wixsite.com/goldie-c" target="_blank">viktord71.wixsite.com/goldie-c</a></span>
     </div>
   </div>
 </div>
@@ -456,7 +462,7 @@
 
     try {
       const isLocal  = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
-      const endpoint = isLocal ? '/api/data' : `./data.json?t=${Date.now()}`;
+      const endpoint = isLocal ? '/api/data' : `./data/data.json?t=${Date.now()}`;
       const res      = await fetch(endpoint);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const payload  = await res.json();

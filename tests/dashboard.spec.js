@@ -166,7 +166,7 @@ test.describe('Add to Cart Dashboard', () => {
     });
 
     test('queen-peptides V3_CATALOG name links to simulations page', async ({ page }) => {
-      const link = page.locator('.env-block .env-name a[href="./v3-queen-peptides-simulations.html"]');
+      const link = page.locator('.env-block .env-name a[href="./docs/simulations/v3-queen-peptides-simulations.html"]');
       await expect(link).toBeVisible();
       await expect(link).toContainText('V3_CATALOG');
     });
@@ -179,5 +179,215 @@ test.describe('Add to Cart Dashboard', () => {
       const copied = await page.evaluate(() => navigator.clipboard.readText());
       expect(copied).toBe('04c6f6c9-4fb0-4a6a-a95a-dd189d27cc08');
     });
+
+    test.describe('Goldie & Celeste V1_CATALOG entry', () => {
+      test('shows Goldie & Celeste msid', async ({ page }) => {
+        await expect(page.locator('.env-block')).toContainText('8cb9cc76-d2c6-40a5-88ff-c5f3ac6f75af');
+      });
+
+      test('displays Goldie & Celeste URL as a link', async ({ page }) => {
+        const link = page.locator('.env-block a[href="https://viktord71.wixsite.com/goldie-c"]');
+        await expect(link).toBeVisible();
+      });
+
+      test('Goldie & Celeste V1_CATALOG name links to goldie-celeste page', async ({ page }) => {
+        const link = page.locator('.env-block .env-name a[href="./goldie-celeste.html"]');
+        await expect(link).toBeVisible();
+        await expect(link).toContainText('V1_CATALOG');
+      });
+
+      test('Goldie & Celeste msid copy button copies correct value', async ({ page, context }) => {
+        await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+        const btn = page.getByTestId('copy-goldie-msid');
+        await expect(btn).toBeVisible();
+        await btn.click();
+        const copied = await page.evaluate(() => navigator.clipboard.readText());
+        expect(copied).toBe('8cb9cc76-d2c6-40a5-88ff-c5f3ac6f75af');
+      });
+    });
+  });
+});
+
+test.describe('Goldie & Celeste sub-page', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/goldie-celeste.html');
+  });
+
+  test('page loads with correct title', async ({ page }) => {
+    await expect(page).toHaveTitle(/Goldie.*Celeste/i);
+  });
+
+  test('back button links to main dashboard', async ({ page }) => {
+    const btn = page.locator('header a.back-btn');
+    await expect(btn).toBeVisible();
+    await expect(btn).toHaveAttribute('href', './index.html');
+    await expect(btn).toContainText('Dashboard');
+  });
+
+  test('store summary card is visible with product count and price range', async ({ page }) => {
+    const summary = page.locator('.store-summary');
+    await expect(summary).toBeVisible();
+    await expect(summary).toContainText('53');
+    await expect(summary).toContainText('$');
+  });
+
+  test('product catalog section renders category cards', async ({ page }) => {
+    const cards = page.locator('.category-card');
+    const count = await cards.count();
+    expect(count).toBeGreaterThan(0);
+  });
+
+  test('category cards contain product list items', async ({ page }) => {
+    const items = page.locator('.product-list li');
+    const count = await items.count();
+    expect(count).toBeGreaterThan(0);
+  });
+
+  test('search input filters products', async ({ page }) => {
+    const input = page.locator('#searchInput');
+    await expect(input).toBeVisible();
+
+    const totalBefore = await page.locator('.product-list li:not(.hidden)').count();
+    await input.fill('mug');
+    const totalAfter = await page.locator('.product-list li:not(.hidden)').count();
+
+    expect(totalAfter).toBeLessThan(totalBefore);
+    expect(totalAfter).toBeGreaterThan(0);
+  });
+
+  test('search shows result count when active', async ({ page }) => {
+    await page.locator('#searchInput').fill('plant');
+    const count = page.locator('#searchCount');
+    await expect(count).toBeVisible();
+    await expect(count).toContainText('Showing');
+  });
+
+  test('category filter narrows displayed cards', async ({ page }) => {
+    const select = page.locator('#categoryFilter');
+    await expect(select).toBeVisible();
+
+    await select.selectOption({ index: 1 }); // pick first real category
+    const visibleCards = page.locator('.category-card:not([style*="display: none"])');
+    const count = await visibleCards.count();
+    expect(count).toBe(1);
+  });
+
+  test('stock filter hides out-of-stock items when "In Stock" selected', async ({ page }) => {
+    await page.locator('#stockFilter').selectOption('in');
+    const oosItems = page.locator('.product-list li.oos:not(.hidden)');
+    expect(await oosItems.count()).toBe(0);
+  });
+
+  test('grid view button switches to card grid layout', async ({ page }) => {
+    const gridBtn = page.locator('#gridViewBtn');
+    await expect(gridBtn).toBeVisible();
+    await gridBtn.click();
+
+    await expect(page.locator('#gridView')).toBeVisible();
+    await expect(page.locator('#listView')).toBeHidden();
+
+    const cards = page.locator('#productCardGrid .product-card');
+    const count = await cards.count();
+    expect(count).toBeGreaterThan(0);
+  });
+
+  test('list view button restores category card layout', async ({ page }) => {
+    await page.locator('#gridViewBtn').click();
+    await page.locator('#listViewBtn').click();
+
+    await expect(page.locator('#listView')).toBeVisible();
+    await expect(page.locator('#gridView')).toBeHidden();
+  });
+
+  test('expand/collapse all buttons toggle category cards', async ({ page }) => {
+    await page.locator('#catalogControls button', { hasText: 'Collapse All' }).click();
+    const collapsed = page.locator('.category-card.collapsed');
+    expect(await collapsed.count()).toBeGreaterThan(0);
+
+    await page.locator('#catalogControls button', { hasText: 'Expand All' }).click();
+    const stillCollapsed = page.locator('.category-card.collapsed');
+    expect(await stillCollapsed.count()).toBe(0);
+  });
+
+  test('simulated conversations section is present', async ({ page }) => {
+    await expect(page.locator('#convs-heading')).toBeVisible();
+    const convs = page.locator('.conversation');
+    expect(await convs.count()).toBe(7);
+  });
+
+  test('conversation headers collapse and expand on click', async ({ page }) => {
+    const first = page.locator('.conversation').first();
+    await expect(first).not.toHaveClass(/collapsed/);
+
+    await first.locator('.conv-header').click();
+    await expect(first).toHaveClass(/collapsed/);
+
+    await first.locator('.conv-header').click();
+    await expect(first).not.toHaveClass(/collapsed/);
+  });
+});
+
+test.describe('V3 Queen Peptides sub-page', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/docs/simulations/v3-queen-peptides-simulations.html');
+  });
+
+  test('page loads with correct title', async ({ page }) => {
+    await expect(page).toHaveTitle(/Queen Peptides/i);
+  });
+
+  test('back button links to main dashboard', async ({ page }) => {
+    const btn = page.locator('header a.back-btn');
+    await expect(btn).toBeVisible();
+    await expect(btn).toHaveAttribute('href', '../../index.html');
+    await expect(btn).toContainText('Dashboard');
+  });
+
+  test('search input is present and filters products', async ({ page }) => {
+    const input = page.locator('#searchInput');
+    await expect(input).toBeVisible();
+
+    const totalBefore = await page.locator('.product-list li:not(.hidden)').count();
+    await input.fill('tirz');
+    const totalAfter = await page.locator('.product-list li:not(.hidden)').count();
+
+    expect(totalAfter).toBeLessThan(totalBefore);
+    expect(totalAfter).toBeGreaterThan(0);
+  });
+
+  test('category filter dropdown is populated', async ({ page }) => {
+    const select = page.locator('#categoryFilter');
+    await expect(select).toBeVisible();
+    const options = select.locator('option');
+    expect(await options.count()).toBeGreaterThan(1);
+  });
+
+  test('stock filter hides out-of-stock items when "In Stock" selected', async ({ page }) => {
+    await page.locator('#stockFilter').selectOption('in');
+    const oosItems = page.locator('.product-list li.oos:not(.hidden)');
+    expect(await oosItems.count()).toBe(0);
+  });
+
+  test('grid view renders product cards', async ({ page }) => {
+    await page.locator('#gridViewBtn').click();
+    await expect(page.locator('#gridView')).toBeVisible();
+    const cards = page.locator('#productCardGrid .product-card');
+    expect(await cards.count()).toBeGreaterThan(0);
+  });
+
+  test('list view toggle restores category grid', async ({ page }) => {
+    await page.locator('#gridViewBtn').click();
+    await page.locator('#listViewBtn').click();
+    await expect(page.locator('#listView')).toBeVisible();
+    await expect(page.locator('#gridView')).toBeHidden();
+  });
+
+  test('conversations section is present and collapsible', async ({ page }) => {
+    const convs = page.locator('.conversation');
+    expect(await convs.count()).toBeGreaterThan(0);
+
+    const first = convs.first();
+    await first.locator('.conv-header').click();
+    await expect(first).toHaveClass(/collapsed/);
   });
 });
