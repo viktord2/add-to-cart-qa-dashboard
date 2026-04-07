@@ -42,7 +42,7 @@ function fetchProjectData() {
       if (err) {
         // Fall back to committed data.json when gh is unavailable (e.g. CI)
         try {
-          const fallback = JSON.parse(readFileSync(join(__dirname, 'data.json'), 'utf8'));
+          const fallback = JSON.parse(readFileSync(join(__dirname, 'data', 'data.json'), 'utf8'));
           return resolve(fallback.tickets ?? fallback);
         } catch {
           return reject(stderr || err.message);
