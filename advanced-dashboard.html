@@ -229,6 +229,13 @@
     return priorityRank(a.priority) - priorityRank(b.priority) || a.number - b.number;
   }
 
+  function esc(s) {
+    return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+  function safeUrl(u) {
+    return typeof u === 'string' && u.startsWith('https://github.com/') ? esc(u) : '#';
+  }
+
   function classify(tickets) {
     return {
       v1v3: tickets.filter(t => t.labels.includes('V1') && t.labels.includes('V3')).sort(byPriority),
@@ -239,23 +246,23 @@
 
   function priorityBadge(p) {
     if (!p) return '<span class="priority-none">—</span>';
-    return `<span class="priority-pill priority-${p.toLowerCase()}">${p}</span>`;
+    return `<span class="priority-pill priority-${esc(p.toLowerCase())}">${esc(p)}</span>`;
   }
 
   function statusBadge(s) {
     const cls = { 'To triage': 'triage', 'Backlog': 'backlog', 'Ready': 'ready', 'In progress': 'inprogress', 'In review': 'inreview', 'Done': 'done' }[s] || 'backlog';
-    return `<span class="status-pill status-${cls}">${s}</span>`;
+    return `<span class="status-pill status-${cls}">${esc(s)}</span>`;
   }
 
   function renderRows(tickets) {
     if (!tickets.length) return '<tr><td colspan="5" style="color:var(--muted);text-align:center;padding:16px">No issues</td></tr>';
     return tickets.map(t => `
       <tr class="bug-row">
-        <td class="issue-num"><a href="${t.url}" target="_blank" rel="noopener">#${t.number}</a></td>
-        <td>${t.title}</td>
+        <td class="issue-num"><a href="${safeUrl(t.url)}" target="_blank" rel="noopener">#${esc(t.number)}</a></td>
+        <td>${esc(t.title)}</td>
         <td class="col-priority">${priorityBadge(t.priority)}</td>
         <td>${statusBadge(t.status)}</td>
-        <td><a class="link-icon" href="${t.url}" target="_blank" rel="noopener">↗</a></td>
+        <td><a class="link-icon" href="${safeUrl(t.url)}" target="_blank" rel="noopener">↗</a></td>
       </tr>`).join('');
   }
 

@@ -104,7 +104,7 @@ createServer(async (req, res) => {
   const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.json': 'application/json', '.csv': 'text/csv', '.css': 'text/css' };
 
   try {
-    if (existsSync(filePath) && !filePath.includes('..')) {
+    if (existsSync(filePath) && filePath.startsWith(__dirname + '/')) {
       const file = readFileSync(filePath);
       const mime = MIME[extname(filePath)] || 'text/plain';
       res.writeHead(200, { 'Content-Type': mime });
