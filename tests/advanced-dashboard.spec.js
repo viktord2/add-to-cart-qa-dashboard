@@ -31,7 +31,9 @@ test.describe('Advanced Dashboard', () => {
 
   test('stat cards show numeric values', async ({ page }) => {
     for (const id of ['stat-open', 'stat-v1', 'stat-v3', 'stat-v1v3']) {
-      const text = await page.locator(`[data-testid="${id}"] .number`).innerText({ timeout: 10000 });
+      const el = page.locator(`[data-testid="${id}"] .number`);
+      await expect(el).not.toHaveText('—', { timeout: 10000 });
+      const text = await el.innerText();
       expect(Number(text)).toBeGreaterThanOrEqual(0);
     }
   });
