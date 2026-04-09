@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<meta name="robots" content="noindex, nofollow"/>
+<title>Add to Cart — Bug Status Report</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root, [data-theme="dark"] {
+    --bg: #0d1117; --surface: #161b22; --surface2: #21262d; --border: #30363d;
+    --text: #e6edf3; --muted: #8b949e; --link: #58a6ff;
+    --v1: #f78166; --v3: #79c0ff; --v1v3: #d2a8ff;
+    --btn-bg: #21262d; --btn-hover: #30363d;
+  }
+  [data-theme="light"] {
+    --bg: #f6f8fa; --surface: #ffffff; --surface2: #f0f2f5; --border: #d0d7de;
+    --text: #1f2328; --muted: #656d76; --link: #0969da;
+    --v1: #cf222e; --v3: #0550ae; --v1v3: #6639ba;
+    --btn-bg: #f3f4f6; --btn-hover: #e9ecef;
+  }
+
+  body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-size: 14px; min-height: 100vh; transition: background .2s, color .2s; }
+
+  /* Header */
+  .page-header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 10; }
+  .header-title { font-size: 15px; font-weight: 600; }
+  .header-subtitle { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .header-right { display: flex; align-items: center; gap: 12px; }
+  a.back-link { font-size: 12px; color: var(--link); text-decoration: none; }
+  a.back-link:hover { text-decoration: underline; }
+  .btn { background: var(--btn-bg); border: 1px solid var(--border); color: var(--text); font-size: 13px; padding: 5px 10px; border-radius: 6px; cursor: pointer; }
+  .btn:hover { background: var(--btn-hover); }
+
+  /* Main */
+  .main { max-width: 1000px; margin: 0 auto; padding: 24px; }
+
+  /* Error */
+  .error-banner { background: #5a1b1b; color: #ff7b72; border-radius: 6px; padding: 10px 16px; margin-bottom: 20px; display: none; }
+
+  /* Stat cards */
+  .stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 32px; }
+  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px 20px; }
+  .stat-card .number { font-size: 28px; font-weight: 700; line-height: 1; margin-bottom: 4px; }
+  .stat-card .label { font-size: 12px; color: var(--muted); }
+  .stat-card.v1-card .number { color: var(--v1); }
+  .stat-card.v3-card .number { color: var(--v3); }
+  .stat-card.v1v3-card .number { color: var(--v1v3); }
+
+  /* Sections */
+  .section { margin-bottom: 24px; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+  .section-header { display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; background: var(--surface2); cursor: pointer; user-select: none; border-bottom: 1px solid var(--border); }
+  .section-header:hover { filter: brightness(1.08); }
+  .section-header-left { display: flex; align-items: center; gap: 10px; }
+  .section-title { font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; }
+  .section-badge { font-size: 11px; font-weight: 600; border-radius: 20px; padding: 2px 8px; }
+  .chevron { font-size: 12px; color: var(--muted); transition: transform .2s; }
+  .section.collapsed .chevron { transform: rotate(-90deg); }
+  .section.collapsed .section-body { display: none; }
+
+  .v1v3-title { color: var(--v1v3); }
+  .v1v3-badge { background: color-mix(in srgb, var(--v1v3) 15%, transparent); color: var(--v1v3); }
+  .v1-title { color: var(--v1); }
+  .v1-badge { background: color-mix(in srgb, var(--v1) 15%, transparent); color: var(--v1); }
+  .v3-title { color: var(--v3); }
+  .v3-badge { background: color-mix(in srgb, var(--v3) 15%, transparent); color: var(--v3); }
+
+  /* Table */
+  .bug-table { width: 100%; border-collapse: collapse; }
+  .bug-table th { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); padding: 7px 14px; text-align: left; background: var(--surface); border-bottom: 1px solid var(--border); }
+  .bug-table th.col-issue { width: 76px; }
+  .bug-table th.col-priority { width: 90px; }
+  .bug-table th.col-status { width: 110px; }
+  .bug-table th.col-link { width: 36px; }
+  .bug-table td { padding: 9px 14px; border-bottom: 1px solid var(--border); font-size: 13px; vertical-align: middle; background: var(--surface); }
+  .bug-table tr:last-child td { border-bottom: none; }
+  .bug-table tr:hover td { background: var(--surface2); }
+  .bug-row .issue-num { font-family: monospace; font-size: 12px; font-weight: 600; }
+  .bug-row .issue-num a { color: var(--link); text-decoration: none; }
+  .bug-row .issue-num a:hover { text-decoration: underline; }
+  .link-icon { color: var(--muted); text-decoration: none; display: block; text-align: center; }
+  .link-icon:hover { color: var(--link); }
+
+  /* Priority badges */
+  .priority-pill { font-size: 10px; font-weight: 700; border-radius: 4px; padding: 2px 6px; display: inline-block; }
+  .priority-critical { background: #5a1b1b; color: #ff7b72; }
+  .priority-high     { background: #3d2000; color: #f0883e; }
+  .priority-medium   { background: #2d2a00; color: #e3b341; }
+  .priority-low      { background: #1a2a1a; color: #56d364; }
+  .priority-none     { color: var(--muted); font-size: 11px; }
+  [data-theme="light"] .priority-critical { background: #ffe0e0; color: #c00; }
+  [data-theme="light"] .priority-high     { background: #fff0e0; color: #c44; }
+  [data-theme="light"] .priority-medium   { background: #fffbe0; color: #886600; }
+  [data-theme="light"] .priority-low      { background: #e6ffe6; color: #276; }
+
+  /* Status badges */
+  .status-pill { font-size: 10px; font-weight: 600; border-radius: 20px; padding: 2px 8px; display: inline-block; }
+  .status-triage     { background: color-mix(in srgb, #f78166 15%, transparent); color: #f78166; }
+  .status-backlog    { background: color-mix(in srgb, #8b949e 15%, transparent); color: #8b949e; }
+  .status-ready      { background: color-mix(in srgb, #58a6ff 15%, transparent); color: #58a6ff; }
+  .status-inprogress { background: color-mix(in srgb, #e3b341 15%, transparent); color: #e3b341; }
+  .status-inreview   { background: color-mix(in srgb, #d2a8ff 15%, transparent); color: #d2a8ff; }
+  .status-done       { background: color-mix(in srgb, #3fb950 15%, transparent); color: #3fb950; }
+
+  /* Footer */
+  .footer { text-align: center; padding: 24px; color: var(--muted); font-size: 12px; border-top: 1px solid var(--border); margin-top: 8px; }
+  .footer a { color: var(--link); text-decoration: none; }
+
+  @media (max-width: 600px) {
+    .stat-grid { grid-template-columns: repeat(2, 1fr); }
+    .bug-table th.col-priority, .bug-table td.col-priority { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<header class="page-header">
+  <div>
+    <div class="header-title">Add to Cart · Bug Status Report</div>
+    <div class="header-subtitle" id="header-subtitle">Ai Site Chat Engine</div>
+  </div>
+  <div class="header-right">
+    <a class="back-link" href="index.html">← Main Dashboard</a>
+    <button class="btn" data-testid="theme-toggle" onclick="toggleTheme()">☀ / ☾</button>
+  </div>
+</header>
+
+<main class="main">
+  <div id="error-banner" class="error-banner"></div>
+
+  <div class="stat-grid">
+    <div class="stat-card" data-testid="stat-open">
+      <div class="number" id="stat-open">0</div>
+      <div class="label">Open Bugs</div>
+    </div>
+    <div class="stat-card v1-card" data-testid="stat-v1">
+      <div class="number" id="stat-v1-val">0</div>
+      <div class="label">V1 Only</div>
+    </div>
+    <div class="stat-card v3-card" data-testid="stat-v3">
+      <div class="number" id="stat-v3-val">0</div>
+      <div class="label">V3 Only</div>
+    </div>
+    <div class="stat-card v1v3-card" data-testid="stat-v1v3">
+      <div class="number" id="stat-v1v3-val">0</div>
+      <div class="label">V1 + V3</div>
+    </div>
+  </div>
+
+  <div class="section" id="sec-v1v3" data-testid="sec-v1v3">
+    <div class="section-header" onclick="toggleSection('sec-v1v3')">
+      <div class="section-header-left">
+        <span class="section-title v1v3-title">Cross-Version</span>
+        <span class="section-badge v1v3-badge" id="badge-v1v3">V1 + V3</span>
+      </div>
+      <span class="chevron">▾</span>
+    </div>
+    <div class="section-body">
+      <table class="bug-table">
+        <thead><tr><th class="col-issue">Issue</th><th>Title</th><th class="col-priority">Priority</th><th class="col-status">Status</th><th class="col-link"></th></tr></thead>
+        <tbody id="tbody-v1v3"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="section" id="sec-v1" data-testid="sec-v1">
+    <div class="section-header" onclick="toggleSection('sec-v1')">
+      <div class="section-header-left">
+        <span class="section-title v1-title">V1 Only</span>
+        <span class="section-badge v1-badge" id="badge-v1">V1</span>
+      </div>
+      <span class="chevron">▾</span>
+    </div>
+    <div class="section-body">
+      <table class="bug-table">
+        <thead><tr><th class="col-issue">Issue</th><th>Title</th><th class="col-priority">Priority</th><th class="col-status">Status</th><th class="col-link"></th></tr></thead>
+        <tbody id="tbody-v1"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="section" id="sec-v3" data-testid="sec-v3">
+    <div class="section-header" onclick="toggleSection('sec-v3')">
+      <div class="section-header-left">
+        <span class="section-title v3-title">V3 Only</span>
+        <span class="section-badge v3-badge" id="badge-v3">V3</span>
+      </div>
+      <span class="chevron">▾</span>
+    </div>
+    <div class="section-body">
+      <table class="bug-table">
+        <thead><tr><th class="col-issue">Issue</th><th>Title</th><th class="col-priority">Priority</th><th class="col-status">Status</th><th class="col-link"></th></tr></thead>
+        <tbody id="tbody-v3"></tbody>
+      </table>
+    </div>
+  </div>
+</main>
+
+<footer class="footer">
+  <span id="last-updated"></span> &nbsp;·&nbsp; <a href="index.html">← Main Dashboard</a>
+</footer>
+
+<script>
+  const THEME_KEY = 'qa-dashboard-theme';
+  const PRIORITY_RANK = { Critical: 0, High: 1, Medium: 2, Low: 3 };
+
+  // Restore saved theme on load
+  (function () {
+    const saved = localStorage.getItem(THEME_KEY);
+    if (saved) document.documentElement.dataset.theme = saved;
+  })();
+
+  function toggleTheme() {
+    const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+    document.documentElement.dataset.theme = next;
+    localStorage.setItem(THEME_KEY, next);
+  }
+
+  function toggleSection(id) {
+    document.getElementById(id).classList.toggle('collapsed');
+  }
+
+  function priorityRank(p) {
+    return p !== null && p in PRIORITY_RANK ? PRIORITY_RANK[p] : 4;
+  }
+
+  function byPriority(a, b) {
+    return priorityRank(a.priority) - priorityRank(b.priority) || a.number - b.number;
+  }
+
+  function classify(tickets) {
+    return {
+      v1v3: tickets.filter(t => t.labels.includes('V1') && t.labels.includes('V3')).sort(byPriority),
+      v1:   tickets.filter(t => t.labels.includes('V1') && !t.labels.includes('V3')).sort(byPriority),
+      v3:   tickets.filter(t => t.labels.includes('V3') && !t.labels.includes('V1')).sort(byPriority),
+    };
+  }
+
+  function priorityBadge(p) {
+    if (!p) return '<span class="priority-none">—</span>';
+    return `<span class="priority-pill priority-${p.toLowerCase()}">${p}</span>`;
+  }
+
+  function statusBadge(s) {
+    const cls = { 'To triage': 'triage', 'Backlog': 'backlog', 'Ready': 'ready', 'In progress': 'inprogress', 'In review': 'inreview', 'Done': 'done' }[s] || 'backlog';
+    return `<span class="status-pill status-${cls}">${s}</span>`;
+  }
+
+  function renderRows(tickets) {
+    if (!tickets.length) return '<tr><td colspan="5" style="color:var(--muted);text-align:center;padding:16px">No issues</td></tr>';
+    return tickets.map(t => `
+      <tr class="bug-row">
+        <td class="issue-num"><a href="${t.url}" target="_blank" rel="noopener">#${t.number}</a></td>
+        <td>${t.title}</td>
+        <td class="col-priority">${priorityBadge(t.priority)}</td>
+        <td>${statusBadge(t.status)}</td>
+        <td><a class="link-icon" href="${t.url}" target="_blank" rel="noopener">↗</a></td>
+      </tr>`).join('');
+  }
+
+  async function loadData() {
+    try {
+      const isLocal = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+      const endpoint = isLocal ? '/api/data' : `./data/data.json?t=${Date.now()}`;
+      const res = await fetch(endpoint);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const payload = await res.json();
+      const tickets   = Array.isArray(payload) ? payload : payload.tickets;
+      const updatedAt = Array.isArray(payload) ? new Date() : new Date(payload.updatedAt);
+      render(tickets, updatedAt);
+    } catch (e) {
+      const banner = document.getElementById('error-banner');
+      banner.textContent = 'Failed to load data: ' + e.message;
+      banner.style.display = 'block';
+    }
+  }
+
+  function render(tickets, updatedAt) {
+    const { v1v3, v1, v3 } = classify(tickets);
+    const total = v1v3.length + v1.length + v3.length;
+
+    document.getElementById('stat-open').textContent    = total;
+    document.getElementById('stat-v1-val').textContent  = v1.length;
+    document.getElementById('stat-v3-val').textContent  = v3.length;
+    document.getElementById('stat-v1v3-val').textContent = v1v3.length;
+
+    document.getElementById('badge-v1v3').textContent = `V1 + V3 · ${v1v3.length} issues`;
+    document.getElementById('badge-v1').textContent   = `V1 · ${v1.length} issues`;
+    document.getElementById('badge-v3').textContent   = `V3 · ${v3.length} issues`;
+
+    document.getElementById('tbody-v1v3').innerHTML = renderRows(v1v3);
+    document.getElementById('tbody-v1').innerHTML   = renderRows(v1);
+    document.getElementById('tbody-v3').innerHTML   = renderRows(v3);
+
+    const dateStr = updatedAt.toLocaleString('pl-PL', {
+      timeZone: 'Europe/Warsaw', day: '2-digit', month: '2-digit',
+      year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
+    });
+    document.getElementById('last-updated').textContent = 'Updated ' + dateStr;
+    document.getElementById('header-subtitle').textContent = `Ai Site Chat Engine · ${updatedAt.toISOString().slice(0, 10)}`;
+  }
+
+  loadData();
+</script>
+</body>
+</html>
