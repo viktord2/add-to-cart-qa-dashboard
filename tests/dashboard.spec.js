@@ -208,9 +208,9 @@ test.describe('Add to Cart Dashboard', () => {
   });
 
   test('"View Report" link points to advanced-dashboard.html', async ({ page }) => {
-    const link = page.locator('a[href="./advanced-dashboard.html"]');
+    const link = page.getByTestId('view-report-link');
     await expect(link).toBeVisible();
-    await expect(link).toContainText('View Report');
+    await expect(link).toHaveText('View Report →');
   });
 });
 
