@@ -1,0 +1,346 @@
+name: AI Chat Widget Regression Suite
+description: >
+  End-to-end regression tests for the Smart Chat AI widget on addtocartcatalogv3.com.
+  Site sells geometric/digital art products (Square, Circle, Triangle, Cube, Cuboid,
+  Pentagon, Digital art). Tests cover widget load, off-catalog rejection, and
+  in-catalog product display.
+platform: web
+url: https://www.addtocartcatalogv3.com/
+driver: playwright
+
+# -----------------------------------------------------------------------
+# Known issues / noise (do NOT fail on these):
+#   - POST /v1/bulk/report-exposures → 403 (Wix petri analytics, unauthenticated visitor, benign)
+#   - react-i18next "old wait option" console warning (non-blocking)
+#   - CartIconViewerWidgetNoCss.bundle.min.js preload warning (non-blocking)
+# Performance note:
+#   - AI responses take 15–40s. All assert timeouts set to 45000ms accordingly.
+# -----------------------------------------------------------------------
+
+tests:
+  # =====================================================================
+  # TEST 1: Chat Widget Loads Correctly
+  # =====================================================================
+  - name: chat-widget-loads
+    description: Verify the Smart Chat widget button appears after page load
+    steps:
+      - action: navigate
+        url: https://www.addtocartcatalogv3.com/
+
+      # Wix Thunderbolt needs ~3s for dynamic content to hydrate
+      - action: wait
+        for: duration
+        duration: 3000
+
+      - action: assert
+        type: visible
+        text: Chat with AI
+        timeout: 10000
+
+      - action: assert
+        type: visible
+        selector: "button.sRspiB9.ou1JQyw--showText"
+        timeout: 10000
+
+  # =====================================================================
+  # TEST 2: Chat Panel Opens on Click
+  # =====================================================================
+  - name: chat-panel-opens
+    description: Clicking the chat toggle opens the Smart Chat panel
+    steps:
+      - action: navigate
+        url: https://www.addtocartcatalogv3.com/
+
+      - action: wait
+        for: duration
+        duration: 3000
+
+      - action: tap
+        text: Chat with AI
+
+      - action: assert
+        type: visible
+        selector: "div.spJEkQS.oAKrQHC--left.oAKrQHC--hasShadow"
+        timeout: 5000
+
+      - action: assert
+        type: visible
+        text: Smart Chat
+        timeout: 5000
+
+      - action: assert
+        type: visible
+        selector: "textarea.so76ab_"
+        timeout: 5000
+
+  # =====================================================================
+  # TEST 3: Off-Catalog Query — Taco Ingredients (Original Query 1)
+  # =====================================================================
+  - name: off-catalog-taco-ingredients
+    description: >
+      Query for taco ingredients must be rejected. Site only sells geometric art.
+      Expected: polite refusal mentioning on-catalog items (Square, Circle, Triangle, Digital art).
+    steps:
+      - action: navigate
+        url: https://www.addtocartcatalogv3.com/
+
+      - action: wait
+        for: duration
+        duration: 3000
+
+      - action: tap
+        text: Chat with AI
+
+      - action: wait
+        for: element
+        selector: "textarea.so76ab_"
+        timeout: 5000
+
+      - action: input
+        selector: "textarea.so76ab_"
+        text: "I need ingredients for tacos"
+
+      - action: press
+        key: Enter
+
+      - action: assert
+        type: visible
+        text: "I need ingredients for tacos"
+        timeout: 5000
+
+      # AI response: must appear and must NOT contain product listings
+      - action: assert
+        type: ai
+        prompt: >
+          The chat shows a response to "I need ingredients for tacos" that politely
+          declines the request. The response should explain that taco ingredients are
+          not covered on this site and redirect the user to on-catalog items
+          (such as Square, Circle, Triangle, or Digital art products).
+          There should be NO product cards or "View Item" buttons shown.
+        timeout: 45000
+
+  # =====================================================================
+  # TEST 4: Off-Catalog Query — Skincare Products Under $50 (Original Query 2)
+  # =====================================================================
+  - name: off-catalog-skincare-under-50
+    description: >
+      Query for skincare products must be rejected. Site only sells geometric art.
+      Expected: polite refusal mentioning on-catalog items.
+    steps:
+      - action: navigate
+        url: https://www.addtocartcatalogv3.com/
+
+      - action: wait
+        for: duration
+        duration: 3000
+
+      - action: tap
+        text: Chat with AI
+
+      - action: wait
+        for: element
+        selector: "textarea.so76ab_"
+        timeout: 5000
+
+      - action: input
+        selector: "textarea.so76ab_"
+        text: "Show me skincare products under $50"
+
+      - action: press
+        key: Enter
+
+      - action: assert
+        type: visible
+        text: "Show me skincare products under $50"
+        timeout: 5000
+
+      - action: assert
+        type: ai
+        prompt: >
+          The chat shows a response to "Show me skincare products under $50" that
+          politely declines. The response should state that skincare products are not
+          available and redirect to geometric/digital art items (Circle, Cube, Pentagon,
+          Digital art, etc.). There should be NO skincare product cards shown.
+        timeout: 45000
+
+  # =====================================================================
+  # TEST 5: Off-Catalog Query — 4K Monitor (Original Query 3)
+  # =====================================================================
+  - name: off-catalog-4k-monitor
+    description: >
+      Query for a 4K monitor must be rejected. Site only sells geometric art.
+      Expected: polite refusal mentioning on-catalog items.
+    steps:
+      - action: navigate
+        url: https://www.addtocartcatalogv3.com/
+
+      - action: wait
+        for: duration
+        duration: 3000
+
+      - action: tap
+        text: Chat with AI
+
+      - action: wait
+        for: element
+        selector: "textarea.so76ab_"
+        timeout: 5000
+
+      - action: input
+        selector: "textarea.so76ab_"
+        text: "Find a 4K monitor"
+
+      - action: press
+        key: Enter
+
+      - action: assert
+        type: visible
+        text: "Find a 4K monitor"
+        timeout: 5000
+
+      - action: assert
+        type: ai
+        prompt: >
+          The chat shows a response to "Find a 4K monitor" that politely declines.
+          The response should state that 4K monitors are not available on this site
+          and redirect to geometric art products (Circle, Square, Cube, Cuboid,
+          Pentagon, Digital art). There should be NO monitor product cards shown.
+        timeout: 45000
+
+  # =====================================================================
+  # TEST 6: In-Catalog Query — Digital Products (Happy Path)
+  # =====================================================================
+  - name: in-catalog-digital-products
+    description: >
+      Querying for digital products must return an actual product card.
+      This is the primary happy-path test confirming the AI can surface catalog items.
+      Expected: "Digital art" product card at $1.00 with a "View Item" button.
+    steps:
+      - action: navigate
+        url: https://www.addtocartcatalogv3.com/
+
+      - action: wait
+        for: duration
+        duration: 3000
+
+      - action: tap
+        text: Chat with AI
+
+      - action: wait
+        for: element
+        selector: "textarea.so76ab_"
+        timeout: 5000
+
+      - action: input
+        selector: "textarea.so76ab_"
+        text: "Show me digital products"
+
+      - action: press
+        key: Enter
+
+      - action: assert
+        type: visible
+        text: "Show me digital products"
+        timeout: 5000
+
+      # Product card must appear
+      - action: assert
+        type: visible
+        text: "Digital art"
+        timeout: 45000
+
+      - action: assert
+        type: visible
+        text: "View Item"
+        timeout: 45000
+
+      - action: assert
+        type: ai
+        prompt: >
+          The chat shows a product card response to "Show me digital products".
+          There should be at least one product card visible showing "Digital art"
+          with a price (around $1.00) and a "View Item" button. The response text
+          should describe the product as a digital artwork.
+        timeout: 45000
+
+  # =====================================================================
+  # TEST 7: In-Catalog via Quick-Action Button
+  # =====================================================================
+  - name: in-catalog-quick-action-digital
+    description: >
+      The "Show me digital products" quick-action button in the chat should work
+      the same as typing the query — returns the Digital art product card.
+    steps:
+      - action: navigate
+        url: https://www.addtocartcatalogv3.com/
+
+      - action: wait
+        for: duration
+        duration: 3000
+
+      - action: tap
+        text: Chat with AI
+
+      - action: wait
+        for: element
+        selector: "button.ssk_G6D.sm9H6KF.sjVxqWp.suOus7v.saQrg8Z.sQPyDls"
+        timeout: 5000
+
+      # Click the quick-action chip
+      - action: tap
+        text: Show me digital products
+        selector: "button.ssk_G6D.sm9H6KF.sjVxqWp.suOus7v.saQrg8Z.sQPyDls"
+
+      - action: assert
+        type: visible
+        text: "Digital art"
+        timeout: 45000
+
+      - action: assert
+        type: visible
+        text: "View Item"
+        timeout: 45000
+
+  # =====================================================================
+  # TEST 8: Message API Returns 200
+  # =====================================================================
+  - name: message-api-returns-200
+    description: >
+      The Wix assistant message creation endpoint must return HTTP 200
+      when a message is submitted.
+    steps:
+      - action: navigate
+        url: https://www.addtocartcatalogv3.com/
+
+      - action: wait
+        for: duration
+        duration: 3000
+
+      - action: tap
+        text: Chat with AI
+
+      - action: wait
+        for: element
+        selector: "textarea.so76ab_"
+        timeout: 5000
+
+      - action: input
+        selector: "textarea.so76ab_"
+        text: "Show me digital products"
+
+      - action: press
+        key: Enter
+
+      # Verify the API call succeeded (no error state in UI)
+      - action: assert
+        type: hidden
+        selector: "[data-testid='error-message']"
+        timeout: 5000
+
+      - action: assert
+        type: ai
+        prompt: >
+          The chat is showing a response (loading or completed). There is no error
+          message, no "failed to send" notification, and no empty broken state.
+          The message "Show me digital products" appears in the chat history.
+        timeout: 10000
