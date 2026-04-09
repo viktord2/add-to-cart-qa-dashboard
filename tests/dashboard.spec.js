@@ -391,3 +391,17 @@ test.describe('V3 Queen Peptides sub-page', () => {
     await expect(first).toHaveClass(/collapsed/);
   });
 });
+
+test.describe('API data shape', () => {
+  test('each ticket has a priority field (string or null)', async ({ request }) => {
+    const res = await request.get('/api/data');
+    expect(res.ok()).toBe(true);
+    const body = await res.json();
+    const tickets = Array.isArray(body) ? body : body.tickets;
+    expect(tickets.length).toBeGreaterThan(0);
+    for (const t of tickets) {
+      expect(t).toHaveProperty('priority');
+      expect(t.priority === null || typeof t.priority === 'string').toBe(true);
+    }
+  });
+});

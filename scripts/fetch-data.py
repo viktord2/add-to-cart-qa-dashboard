@@ -16,6 +16,11 @@ for item in nodes:
          if fv.get('field', {}).get('name') == 'Status'),
         'No Status'
     )
+    priority = next(
+        (fv['name'] for fv in item['fieldValues']['nodes']
+         if fv.get('field', {}).get('name') == 'Priority'),
+        None
+    )
     assignees = [
         {'login': a['login'], 'avatarUrl': a['avatarUrl']}
         for a in content.get('assignees', {}).get('nodes', [])
@@ -28,6 +33,7 @@ for item in nodes:
         'labels': labels,
         'assignees': assignees,
         'status': status,
+        'priority': priority,
     })
 
 result = {'tickets': tickets, 'updatedAt': datetime.datetime.utcnow().isoformat() + 'Z'}

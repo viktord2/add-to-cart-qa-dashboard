@@ -57,6 +57,8 @@ function fetchProjectData() {
           .map(item => {
             const status = item.fieldValues.nodes
               .find(fv => fv?.field?.name === 'Status')?.name ?? 'No Status';
+            const priority = item.fieldValues.nodes
+              .find(fv => fv?.field?.name === 'Priority')?.name ?? null;
             return {
               number: item.content.number,
               title: item.content.title,
@@ -65,6 +67,7 @@ function fetchProjectData() {
               labels: item.content.labels.nodes.map(l => l.name),
               assignees: item.content.assignees.nodes.map(a => ({ login: a.login, avatarUrl: a.avatarUrl })),
               status,
+              priority,
             };
           })
           .filter(t => t.labels.some(l => l.toLowerCase() === 'add to cart'))
