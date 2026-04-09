@@ -206,6 +206,12 @@ test.describe('Add to Cart Dashboard', () => {
       });
     });
   });
+
+  test('"View Report" link points to advanced-dashboard.html', async ({ page }) => {
+    const link = page.locator('a[href="./advanced-dashboard.html"]');
+    await expect(link).toBeVisible();
+    await expect(link).toContainText('View Report');
+  });
 });
 
 test.describe('Goldie & Celeste sub-page', () => {
