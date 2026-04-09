@@ -206,6 +206,12 @@ test.describe('Add to Cart Dashboard', () => {
       });
     });
   });
+
+  test('"View Report" link points to advanced-dashboard.html', async ({ page }) => {
+    const link = page.getByTestId('view-report-link');
+    await expect(link).toBeVisible();
+    await expect(link).toHaveText('View Report →');
+  });
 });
 
 test.describe('Goldie & Celeste sub-page', () => {
@@ -389,5 +395,19 @@ test.describe('V3 Queen Peptides sub-page', () => {
     const first = convs.first();
     await first.locator('.conv-header').click();
     await expect(first).toHaveClass(/collapsed/);
+  });
+});
+
+test.describe('API data shape', () => {
+  test('each ticket has a priority field (string or null)', async ({ request }) => {
+    const res = await request.get('/api/data');
+    expect(res.ok()).toBe(true);
+    const body = await res.json();
+    const tickets = Array.isArray(body) ? body : body.tickets;
+    expect(tickets.length).toBeGreaterThan(0);
+    for (const t of tickets) {
+      expect(t).toHaveProperty('priority');
+      expect(t.priority === null || typeof t.priority === 'string').toBe(true);
+    }
   });
 });

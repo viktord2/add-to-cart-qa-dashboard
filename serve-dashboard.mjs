@@ -43,7 +43,8 @@ function fetchProjectData() {
         // Fall back to committed data.json when gh is unavailable (e.g. CI)
         try {
           const fallback = JSON.parse(readFileSync(join(__dirname, 'data', 'data.json'), 'utf8'));
-          return resolve(fallback.tickets ?? fallback);
+          const tickets = (fallback.tickets ?? fallback).map(t => ({ priority: null, ...t }));
+          return resolve(tickets);
         } catch {
           return reject(stderr || err.message);
         }
@@ -57,6 +58,8 @@ function fetchProjectData() {
           .map(item => {
             const status = item.fieldValues.nodes
               .find(fv => fv?.field?.name === 'Status')?.name ?? 'No Status';
+            const priority = item.fieldValues.nodes
+              .find(fv => fv?.field?.name === 'Priority')?.name ?? null;
             return {
               number: item.content.number,
               title: item.content.title,
@@ -65,6 +68,7 @@ function fetchProjectData() {
               labels: item.content.labels.nodes.map(l => l.name),
               assignees: item.content.assignees.nodes.map(a => ({ login: a.login, avatarUrl: a.avatarUrl })),
               status,
+              priority,
             };
           })
           .filter(t => t.labels.some(l => l.toLowerCase() === 'add to cart'))
@@ -101,7 +105,7 @@ createServer(async (req, res) => {
   const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.json': 'application/json', '.csv': 'text/csv', '.css': 'text/css' };
 
   try {
-    if (existsSync(filePath) && !filePath.includes('..')) {
+    if (existsSync(filePath) && filePath.startsWith(__dirname + '/')) {
       const file = readFileSync(filePath);
       const mime = MIME[extname(filePath)] || 'text/plain';
       res.writeHead(200, { 'Content-Type': mime });

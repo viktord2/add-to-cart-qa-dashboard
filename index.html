@@ -87,6 +87,7 @@
       cursor: pointer;
       transition: background .15s;
       white-space: nowrap;
+      text-decoration: none;
     }
     .btn:hover { background: var(--btn-hover); }
     .btn:disabled { opacity: .5; cursor: not-allowed; }
@@ -270,6 +271,7 @@
   </div>
   <div style="text-align:right">
     <div class="header-actions">
+      <a href="./advanced-dashboard.html" class="btn" data-testid="view-report-link">View Report →</a>
       <button class="btn theme-btn" id="themeBtn" data-testid="theme-toggle" onclick="toggleTheme()" title="Toggle theme">🌙</button>
       <button class="btn" id="refreshBtn" data-testid="refresh-btn" onclick="loadData()">
         <span class="spin" id="spinner">↻</span> Refresh
