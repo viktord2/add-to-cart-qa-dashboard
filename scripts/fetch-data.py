@@ -9,8 +9,6 @@ for item in nodes:
     if not content or 'number' not in content:
         continue
     labels = [l['name'] for l in content.get('labels', {}).get('nodes', [])]
-    if not any(l.lower() == 'add to cart' for l in labels):
-        continue
     status = next(
         (fv['name'] for fv in item['fieldValues']['nodes']
          if fv.get('field', {}).get('name') == 'Status'),
