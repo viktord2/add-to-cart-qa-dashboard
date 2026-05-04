@@ -36,5 +36,9 @@ for item in nodes:
         'priority': priority,
     })
 
+if not tickets:
+    print("fetch-data: 0 tickets after filtering — refusing to overwrite data", file=sys.stderr)
+    sys.exit(1)
+
 result = {'tickets': tickets, 'updatedAt': datetime.datetime.utcnow().isoformat() + 'Z'}
 print(json.dumps(result))
