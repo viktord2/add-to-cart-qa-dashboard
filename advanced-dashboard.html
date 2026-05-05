@@ -84,15 +84,15 @@
 
   /* Priority badges */
   .priority-pill { font-size: 10px; font-weight: 700; border-radius: 4px; padding: 2px 6px; display: inline-block; }
-  .priority-critical { background: #5a1b1b; color: #ff7b72; }
-  .priority-high     { background: #3d2000; color: #f0883e; }
-  .priority-medium   { background: #2d2a00; color: #e3b341; }
-  .priority-low      { background: #1a2a1a; color: #56d364; }
-  .priority-none     { color: var(--muted); font-size: 11px; }
-  [data-theme="light"] .priority-critical { background: #ffe0e0; color: #c00; }
-  [data-theme="light"] .priority-high     { background: #fff0e0; color: #c44; }
-  [data-theme="light"] .priority-medium   { background: #fffbe0; color: #886600; }
-  [data-theme="light"] .priority-low      { background: #e6ffe6; color: #276; }
+  .priority-p0 { background: #5a1b1b; color: #ff7b72; }
+  .priority-p1 { background: #3d2000; color: #f0883e; }
+  .priority-p2 { background: #2d2a00; color: #e3b341; }
+  .priority-p3 { background: #1a2a1a; color: #56d364; }
+  .priority-none { color: var(--muted); font-size: 11px; }
+  [data-theme="light"] .priority-p0 { background: #ffe0e0; color: #c00; }
+  [data-theme="light"] .priority-p1 { background: #fff0e0; color: #c44; }
+  [data-theme="light"] .priority-p2 { background: #fffbe0; color: #886600; }
+  [data-theme="light"] .priority-p3 { background: #e6ffe6; color: #276; }
 
   /* Status badges */
   .status-pill { font-size: 10px; font-weight: 600; border-radius: 20px; padding: 2px 8px; display: inline-block; }
@@ -203,7 +203,7 @@
 
 <script>
   const THEME_KEY = 'qa-dashboard-theme';
-  const PRIORITY_RANK = { Critical: 0, High: 1, Medium: 2, Low: 3 };
+  const PRIORITY_RANK = { P0: 0, P1: 1, P2: 2, P3: 3 };
 
   // Restore saved theme on load
   (function () {

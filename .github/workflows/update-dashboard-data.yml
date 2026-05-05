@@ -26,7 +26,7 @@ jobs:
               projectV2(number: 365) {
                 items(first: 100) {
                   nodes {
-                    fieldValues(first: 10) {
+                    fieldValues(first: 15) {
                       nodes {
                         ... on ProjectV2ItemFieldSingleSelectValue {
                           name
