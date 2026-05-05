@@ -39,7 +39,7 @@ test.describe('Advanced Dashboard', () => {
   });
 
   test('open bugs count equals v1 + v3 + v1v3', async ({ page }) => {
-    await page.locator('[data-testid="stat-open"] .number').waitFor({ timeout: 10000 });
+    await expect(page.locator('[data-testid="stat-open"] .number')).not.toHaveText('—', { timeout: 10000 });
     const open = Number(await page.locator('[data-testid="stat-open"] .number').innerText());
     const v1   = Number(await page.locator('[data-testid="stat-v1"] .number').innerText());
     const v3   = Number(await page.locator('[data-testid="stat-v3"] .number').innerText());
