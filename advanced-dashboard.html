@@ -132,7 +132,7 @@
   <div class="stat-grid">
     <div class="stat-card" data-testid="stat-open">
       <div class="number" id="stat-open">—</div>
-      <div class="label">Open Bugs</div>
+      <div class="label">To Triage</div>
     </div>
     <div class="stat-card v1-card" data-testid="stat-v1">
       <div class="number" id="stat-v1-val">—</div>
@@ -284,7 +284,8 @@
   }
 
   function render(tickets, updatedAt) {
-    const { v1v3, v1, v3 } = classify(tickets);
+    const triageTickets = tickets.filter(t => t.status === 'To triage');
+    const { v1v3, v1, v3 } = classify(triageTickets);
     const total = v1v3.length + v1.length + v3.length;
 
     document.getElementById('stat-open').textContent    = total;
